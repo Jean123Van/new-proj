@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { FriendsEntity } from "src/friends/entity/friends.entity";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
 export class UserEntity {
@@ -23,5 +24,6 @@ export class UserEntity {
 
     @CreateDateColumn()
     created_at: Date;
+
 
 }

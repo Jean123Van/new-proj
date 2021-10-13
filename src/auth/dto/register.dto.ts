@@ -1,4 +1,4 @@
-import { IsAlpha, IsAlphanumeric, IsEmail, IsNotEmpty, Length } from "class-validator";
+import { IsAlpha, IsAlphanumeric, IsEmail, IsNotEmpty, Length, Matches } from "class-validator";
 
 export class RegisterDto {
     
@@ -22,5 +22,8 @@ export class RegisterDto {
     username: string;
 
     @Length(8,32)
+    @Matches(/[A-Z]/,{message:'password must contain at least one uppercase letter'})
+    @Matches(/[a-z]/,{message:'password must contain at least one lowercase letter'} )
+    @Matches(/[^a-zA-Z0-9]/,{message:'password must contain at least one special letter'})
     password: string
 } 

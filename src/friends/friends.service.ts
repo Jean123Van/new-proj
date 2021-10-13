@@ -1,5 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { UserEntity } from 'src/auth/entity/user.entity';
+import { Injectable } from '@nestjs/common';
 import { UserRepository } from 'src/auth/repository/user.repository';
 import { FriendsRepository } from './repository/friends.repository';
 
@@ -8,46 +7,36 @@ export class FriendsService {
     constructor(private readonly friendsRepository: FriendsRepository,
                 private readonly userRepository: UserRepository){}
 
-    async addFriend(userId: string, user: string){
-        const [friend] = await this.userRepository.find({id:userId})
-        const [friend1] = await this.friendsRepository.find({friend_user_id:userId})
+    async addFriend(friendUserId: string, userId: string){
+        this.userRepository.validateUUID(friendUserId)
+        const [user] = await this.userRepository.find({id:friendUserId})
+        const [friend] = await this.friendsRepository.find({friend_user_id:friendUserId})
 
-        if(!friend){
-            throw new BadRequestException('user doesn\'t exist')
-        }
+        this.userRepository.isUser(user)
+        this.friendsRepository.isFriend(friend,friendUserId,userId)
 
-        if(friend1){
-            throw new BadRequestException('You are already friends')
-        }
-
-        if(userId==user){
-            throw new BadRequestException('You cannot add yourself')
-        }
-
-        return this.friendsRepository.save({friend_user_id:userId, user})
+        return this.friendsRepository.save({friend_user_id:friendUserId, user_id:userId})
     }
 
-    async deleteFriend(userId: string, user: string){
-        const [friend] = await this.friendsRepository.find({friend_user_id:userId, user})
+    async deleteFriend(friendUserId: string, userId: string){
+        this.userRepository.validateUUID(friendUserId)
+        const [friend] = await this.friendsRepository.find({friend_user_id:friendUserId, user_id:userId})
 
-        if(!friend){
-            throw new BadRequestException('deletion request cannot be processed')
-        }
+        this.friendsRepository.deleteValidation(friend)
 
-        return this.friendsRepository.delete({friend_user_id:userId, user})
+        this.friendsRepository.delete({friend_user_id:friendUserId, user_id:userId})
     }
 
     async listFriends(user:string){
-        const list = await this.friendsRepository.find({user})
-        let x = []
+        const list = await this.friendsRepository.find({user_id:user})
+  
+        let friends = []
 
         for(let i=0; list.length>i; i++){
             const [friend] = await this.userRepository.find({id:list[i].friend_user_id})
-
             const {id,first_name, last_name, username, email} = friend
-
-            x.push({id,first_name, last_name, username, email})
+            friends.push({id,first_name, last_name, username, email})
         }
-        return x
+        return friends
     }
 }

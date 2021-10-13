@@ -11,28 +11,14 @@ export class AuthService {
                 private readonly jwtService: JwtService){}
 
     async register(registerDto: RegisterDto){
-
         const {password, username, email} = registerDto
 
-        const [name] = await this.userRepository.find({username})
-        const [emailAd] = await this.userRepository.find({email})
+        const user = await this.userRepository.findOne({where: [{username},{email}]})
 
-        if (name){
-            throw new BadRequestException('username already exists')
-        }
-        if(emailAd){
-            throw new BadRequestException('email already exists')
-        }
-        
-        if(!/[A-Z]/.test(password)){
-            throw new BadRequestException('password must contain at least one uppercase letter')
-        } else if (!/[a-z]/.test(password)){
-            throw new BadRequestException('password must contain at least one lowercase letter')
-        } else if (!/[^a-zA-Z0-9]/.test(password)){
-            throw new BadRequestException('password must contain at least one special character')
-        }
+        this.userRepository.registrationValidation(user,email,username)
 
         const salt = await bcrypt.genSalt()
+
         const hashedPassword = await bcrypt.hash(password,salt)
 
         this.userRepository.save({...registerDto, password:hashedPassword})
@@ -42,15 +28,11 @@ export class AuthService {
         const {username, password} = loginDto
         const [user] = await this.userRepository.find({username})
 
-        if(!user){
-            throw new BadRequestException('Invalid username or password')
-        }
+        this.userRepository.userValidation(user)
         
         const valid = await bcrypt.compare(password,user.password)
 
-        if(!valid){
-            throw new BadRequestException('Invalid username or password')
-        }
+        this.userRepository.passwordValidation(valid)
 
         const {first_name, last_name} = user
 

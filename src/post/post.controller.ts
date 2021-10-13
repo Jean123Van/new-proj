@@ -18,8 +18,8 @@ export class PostController {
     }
 
     @Get('/:post_id')
-    viewPost(@Param('post_id') id: string, @GetUser() user:UserEntity){
-        return this.postService.viewPost(id, user.id)
+    getPost(@Param('post_id') post_id: string, @GetUser() user:UserEntity){
+        return this.postService.getPost(post_id, user.id)
     }
 
     @Delete('/:post_id')
@@ -32,10 +32,15 @@ export class PostController {
         return this.postService.createComment(postId,user.id,commentDto)
     }
 
+    @Get('/:post_id/comments')
+    getAllComments(@Param('post_id') postId: string){
+        return this.postService.getAllComments(postId)
+    }
+
     @Get('/:post_id/comments/:comment_id')
-    viewComment(@Param('post_id') postId: string, @GetUser() user: UserEntity, 
+    getComment(@Param('post_id') postId: string, @GetUser() user: UserEntity, 
                 @Param('comment_id')commentId: string){
-        return this.postService.viewComment(postId, user.id, commentId)
+        return this.postService.getComment(postId, user.id, commentId)
     }
 
     @Delete('/:post_id/comments/:comment_id')

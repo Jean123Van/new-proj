@@ -2,9 +2,12 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import {TypeOrmModule} from '@nestjs/typeorm'
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SearchModule } from './search/search.module';
+import { UserModule } from './user/user.module';
 import { FriendsModule } from './friends/friends.module';
 import { PostModule } from './post/post.module';
+import { DogFactsModule } from './dog-facts/dog-facts.module';
+import { ScheduledMessageModule } from './scheduled-message/scheduled-message.module';
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   imports: [
@@ -24,7 +27,9 @@ import { PostModule } from './post/post.module';
         autoLoadEntities: true,
         synchronize: true,
       }),
-    }),AuthModule, SearchModule, FriendsModule, PostModule],
+    }),
+    ScheduleModule.forRoot(),
+    AuthModule, UserModule, FriendsModule, PostModule, DogFactsModule, ScheduledMessageModule],
   controllers: [],
   providers: [],
 })

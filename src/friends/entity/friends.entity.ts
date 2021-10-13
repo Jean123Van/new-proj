@@ -6,9 +6,9 @@ export class FriendsEntity{
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @ManyToOne(() => UserEntity)
-    user?: string;
+    @Column()
+    user_id: string;
 
     @Column()
-    friend_user_id: string
+    friend_user_id: string;
 }

@@ -15,58 +15,44 @@ export class PostService {
         return this.postRepository.save({...postDto,user})
     }
 
-    async viewPost(id:string, user:string){
+    async getPost(post_id:string, userId:string){
+        const [post] = await this.postRepository.find({id:post_id})
+        const [friend] = await this.friendRepository.find({user_id:userId, friend_user_id:post.user})
 
-       const [post] = await this.postRepository.find({id:id})
-       const [friend] = await this.friendRepository.find({user:user, friend_user_id:post.user})
-        const [personal] = await this.postRepository.find({id:id, user:user})
-
-        if (friend||personal){
-            const {title, description} = post
-            return {title, description}
-        } else {
-            throw new BadRequestException('Cannot access this post')
-        }
+        return this.postRepository.getPost(post,friend,userId)
     }
 
     async deletePost(id:string, user:string){
-
-        const [personal] = await this.postRepository.find({id:id, user:user})
-
-        if (personal){
-            return this.postRepository.delete({id:id})
-        } else {
-            throw new BadRequestException('Cannot access this post')
-        }
+        const [post] = await this.postRepository.find({id:id, user:user})
+        this.postRepository.postVerification(post)
+        this.postRepository.delete({id:id})
     }
 
-    createComment(postId: string, userId: string, comment: CommentDto){
+    async createComment(postId: string, userId: string, comment: CommentDto){
+        const [post] = await this.postRepository.find({id:postId})
+        this.postRepository.postValidation(post)
+        const [friend] = await this.friendRepository.find({user_id:userId, friend_user_id:post.user})
+        this.commentRepository.commentFilter(userId,post,friend)
+
         return this.commentRepository.save({post_id:postId, user_id:userId, ...comment})
     }
 
-    async viewComment(postId:string, user:string, commentId:string){
+    async getAllComments(postId:string){
+        return this.commentRepository.find({post_id:postId})
+    }
+
+    async getComment(postId:string, user:string, commentId:string){
 
         const[comments] = await this.commentRepository.find({id:commentId})
-        const [friend] = await this.friendRepository.find({user:user, friend_user_id:comments.user_id})
-        const [personal] = await this.commentRepository.find({user_id:user, post_id:postId, id: commentId})
-
-        if (friend||personal){
-            const {comment} = comments
-            return {comment}
-        } else {
-            throw new BadRequestException('Cannot access this comment')
-        }
+        this.commentRepository.commentValidation(comments,postId)
+        const [friend] = await this.friendRepository.find({user_id:user, friend_user_id:comments.user_id})
+        return this.commentRepository.getComment(friend, comments, user)
     }
 
     async deleteComment(postId:string, user:string, commentId:string){
-
-        const [personal] = await this.commentRepository.find({user_id:user,post_id:postId,id:commentId})
-
-        if (personal){
-            return this.commentRepository.delete({id:commentId})
-        } else {
-            throw new BadRequestException('Cannot access this comment')
-        }
+        const [comment] = await this.commentRepository.find({user_id:user,post_id:postId,id:commentId})
+        this.commentRepository.deleteComment(comment)
+        this.commentRepository.delete({id:commentId})
     }
 
 }

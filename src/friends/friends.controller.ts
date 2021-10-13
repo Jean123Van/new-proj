@@ -9,14 +9,14 @@ import { FriendsService } from './friends.service';
 export class FriendsController {
     constructor(private readonly friendsService: FriendsService){}
 
-    @Post('/friends/:user_id')
-    addFriend(@Param('user_id') userId: string, @GetUser() user: UserEntity){
-        return this.friendsService.addFriend(userId, user.id)
+    @Post('/friends/:friend_user_id')
+    addFriend(@Param('friend_user_id') friendUserId: string, @GetUser() user: UserEntity){
+        return this.friendsService.addFriend(friendUserId, user.id)
     }
 
-    @Delete('/friends/:user_id')
-    deleteFriend(@Param('user_id') userId: string, @GetUser() user: UserEntity){
-        return this.friendsService.deleteFriend(userId, user.id)
+    @Delete('/friends/:friend_user_id')
+    deleteFriend(@Param('friend_user_id') friendUserId: string, @GetUser() user: UserEntity){
+        return this.friendsService.deleteFriend(friendUserId, user.id)
     }
 
     @Get('/friends')
